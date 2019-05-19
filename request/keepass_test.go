@@ -67,10 +67,10 @@ func TestGetLogin(t *testing.T) {
 	ss, err := store.Open("one:sample")
 	assert.NoError(t, err)
 	b, _ := ioutil.ReadAll(ss)
-	assert.Equal(t, "uuser\nesteban", string(b))
+	assert.Equal(t, "user:uuser\npass:esteban", string(b))
 
 	ss, err = store.Open("sample")
 	assert.NoError(t, err)
 	b, _ = ioutil.ReadAll(ss)
-	assert.Equal(t, "uuser\nesteban", string(b))
+	assert.Equal(t, "user:uuser\npass:esteban", string(b))
 }

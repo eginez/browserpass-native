@@ -3,6 +3,7 @@ package request
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,6 +13,42 @@ import (
 	"github.com/browserpass/browserpass-native/response"
 	log "github.com/sirupsen/logrus"
 )
+
+func fetchDecryptedKeepContents(request *request){
+	responseData := response.MakeFetchResponse()
+	st, err := NewKeepassStore([]StoreDefinition{}, true)
+	if err != nil {
+		log.Errorf("Pass not found %v", request.File)
+		response.SendErrorAndExit(
+			errors.CodeInvalidPasswordFileExtension,
+			&map[errors.Field]string{
+				errors.FieldMessage: "Pass not found",
+				errors.FieldAction:  "fetch",
+				errors.FieldFile:    request.File,
+			},
+		)
+	}
+	defer func() {	st.Database.LockProtectedEntries() }()
+
+	file := strings.Replace(request.File, ".gpg", "", -1)
+	closer, err := st.Open(file)
+	if err != nil {
+		log.Errorf("Error in %s for %s", err, request.File)
+		response.SendErrorAndExit(
+			errors.CodeInvalidPasswordFileExtension,
+			&map[errors.Field]string{
+				errors.FieldMessage: err.Error(),
+				errors.FieldAction:  "fetch",
+				errors.FieldFile:    request.File,
+			},
+		)
+	}
+
+
+	contents, _ := ioutil.ReadAll(closer)
+	responseData.Contents = string(contents)
+	response.SendOk(responseData)
+}
 
 func fetchDecryptedContents(request *request) {
 	responseData := response.MakeFetchResponse()

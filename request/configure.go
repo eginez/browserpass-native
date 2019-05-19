@@ -12,6 +12,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+func configureKeePass(request *request){
+	responseData := response.MakeConfigureResponse()
+	responseData.DefaultStore.Path = "/tmp/"
+	responseData.DefaultStore.Settings = `""`
+	responseData.StoreSettings["1"] = "1"
+	response.SendOk(responseData)
+}
+
 func configure(request *request) {
 	responseData := response.MakeConfigureResponse()
 

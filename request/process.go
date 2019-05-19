@@ -63,11 +63,14 @@ func Process() {
 
 	switch request.Action {
 	case "configure":
-		configure(request)
+		//configure(request)
+		configureKeePass(request)
 	case "list":
-		listFiles(request)
+		//listFiles(request)
+		listKeePassEntries(request)
 	case "fetch":
-		fetchDecryptedContents(request)
+		fetchDecryptedKeepContents(request)
+		//fetchDecryptedContents(request)
 	case "echo":
 		response.SendRaw(request.EchoResponse)
 	default:

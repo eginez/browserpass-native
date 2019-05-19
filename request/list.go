@@ -84,3 +84,38 @@ func listFiles(request *request) {
 
 	response.SendOk(responseData)
 }
+
+func listKeePassEntries(request *request){
+	responseData := response.MakeListResponse()
+	var str store
+	for _, s := range request.Settings.Stores {
+		str = s
+		break
+	}
+
+	st, err := NewKeepassStore([]StoreDefinition{}, true)
+	if err != nil {
+		log.Errorf(
+			"The password store '%+v' is not accessible at its location: %+v",
+			"default", err,
+		)
+		response.SendErrorAndExit(
+			errors.CodeInaccessiblePasswordStore,
+			&map[errors.Field]string{
+				errors.FieldMessage:   "The password store is not accessible",
+				errors.FieldAction:    "list",
+				errors.FieldError:     err.Error(),
+				errors.FieldStoreID:   str.ID,
+				errors.FieldStoreName: str.Name,
+				errors.FieldStorePath: str.Path,
+			},
+		)
+	}
+	defer func() {	st.Database.LockProtectedEntries() }()
+
+	kst := st
+	files, err := kst.AllEntries()
+	sort.Strings(files)
+	responseData.Files[str.ID] = files
+	response.SendOk(responseData)
+}
